@@ -1,21 +1,22 @@
-import express from "express";
-import cors from "cors";
+import { initializeDatabase } from "./lib/db.js";
+import app from "./app.js";
 import "dotenv/config";
-import { getUsers } from "./lib/getUsers.js";
 
-const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 8080;
 
-app.listen(8080, () => {
-  console.log("Server is running on port 8080");
-});
-
-app.get("/users", async (req, res) => {
+async function startServer() {
   try {
-    const users = await getUsers();
-    res.json(users);
+    await initializeDatabase();
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error(
+      "Failed to start server due to initialization errors:",
+      error.message
+    );
+    process.exit(1);
   }
-});
+}
+
+startServer();
