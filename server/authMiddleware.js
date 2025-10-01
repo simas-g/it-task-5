@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 export function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -16,7 +14,7 @@ export function verifyToken(req, res, next) {
       .json({ message: "Access denied. Malformed token format." });
   }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
@@ -28,7 +26,7 @@ export function checkAdmin(req, res, next) {
   if (!req.user || !req.user.status) {
     return res.status(403).json({ message: "Forbidden. User status unknown." });
   }
-  if (req.user.status === "admin") {
+  if (req.user.status === "active") {
     next();
   } else {
     return res

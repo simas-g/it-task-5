@@ -1,14 +1,8 @@
 import express from "express";
-import {
-  updateUserStatus,
-  getAllUsers,
-} from "../controllers/userControllers.js";
-import {
-  verifyToken,
-  checkAdmin,
-  updateUserStatus,
-} from "../middleware/authMiddleware.js";
+import { updateStatus, getUsers } from "../controllers/userControllers.js";
+import { verifyToken, checkAdmin } from "../authMiddleware.js";
 
 const router = express.Router();
-router.get("/", verifyToken, getAllUsers);
-router.patch("/:id/status", verifyToken, checkAdmin, updateUserStatus);
+router.get("/", verifyToken, getUsers);
+router.patch("/:id/status", verifyToken, checkAdmin, updateStatus);
+export default router;

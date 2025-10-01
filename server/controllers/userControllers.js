@@ -1,73 +1,41 @@
-import { pool } from "../config/connecttodb.js";
+import { getAllUsers, updateUserStatus } from "../userModel.js";
 
-export async function findUserByEmail(email) {
-  const query =
-    "SELECT id, name, email, password_hash, status, last_login_time FROM users WHERE email = ?";
-
+export async function getUsers(_req, res) {
   try {
-    const [rows] = await pool.query(query, [email]);
-    return rows[0] || null;
+    const users = await getAllUsers();
+    return res.status(200).json(users);
   } catch (error) {
-    console.error("Database Error (findUserByEmail):", error);
-    throw new Error("Failed to query user data.");
+    console.error("Controller Error (getUsers):", error.message);
+    return res
+      .status(500)
+      .json({ message: "Failed to retrieve user list due to a server error." });
   }
 }
 
-export async function createUser({
-  name,
-  email,
-  password_hash,
-  verification_token,
-  status = "unverified",
-}) {
-  const query = `
-        INSERT INTO users 
-            (name, email, password_hash, verification_token, status)
-        VALUES (?, ?, ?, ?, ?)
-    `;
-
+export async function updateStatus(req, res) {
+  const targetUserId = parseInt(req.params.id, 10);
+  const { status: newStatus } = req.body;
+  const currentAdminId = req.user.id;
+  if (!newStatus || (newStatus !== "active" && newStatus !== "blocked")) {
+    return res.status(400).json({
+      message: "Invalid status provided. Must be 'active' or 'blocked'.",
+    });
+  }
   try {
-    const [result] = await pool.query(query, [
-      name,
-      email,
-      password_hash,
-      verification_token,
-      status,
-    ]);
-    return result.insertId;
-  } catch (error) {
-    console.error("Database Error (createUser):", error);
-    if (error.code === "ER_DUP_ENTRY") {
-      throw new Error("Duplicate email entry.");
+    const success = await updateUserStatus(targetUserId, newStatus);
+    if (success) {
+      return res.status(200).json({
+        message: `User ${targetUserId} status updated to '${newStatus}' successfully.`,
+      });
+    } else {
+      return res.status(404).json({
+        message: `User with ID ${targetUserId} not found.`,
+      });
     }
-    throw new Error("Failed to create user record.");
-  }
-}
-
-export async function getAllUsers() {
-  const query = `
-        SELECT id, name, email, status, last_login_time, created_at
-        FROM users 
-        ORDER BY last_login_time DESC, created_at DESC
-    `;
-
-  try {
-    const [rows] = await pool.query(query);
-    return rows;
   } catch (error) {
-    console.error("Database Error (getAllUsers):", error);
-    throw new Error("Failed to retrieve user list.");
-  }
-}
-
-export async function updateUserStatus(userId, newStatus) {
-  const query = "UPDATE users SET status = ? WHERE id = ?";
-
-  try {
-    const [result] = await pool.query(query, [newStatus, userId]);
-    return result.affectedRows === 1;
-  } catch (error) {
-    console.error("Database Error (updateUserStatus):", error);
-    throw new Error("Failed to update user status.");
+    console.error("Controller Error (updateStatus):", error.message);
+    return res
+      .status(500)
+      .json({ message: "Failed to update user status due to a server error." });
   }
 }

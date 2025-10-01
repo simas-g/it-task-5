@@ -1,9 +1,9 @@
 import mysql from "mysql2";
 
-const pool = mysql.createPool(process.env.DATABASE_URL).promise();
-
+let pool;
 async function initializeDatabase() {
   try {
+    pool = mysql.createPool(process.env.DATABASE_URL).promise();
     const connection = await pool.getConnection();
     console.log("MySQL Connection Pool initialized successfully");
     connection.release();

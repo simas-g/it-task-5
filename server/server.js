@@ -1,14 +1,12 @@
+import "dotenv/config";
 import { initializeDatabase } from "./lib/db.js";
 import app from "./app.js";
-import "dotenv/config";
-
-const PORT = process.env.PORT || 8080;
 
 async function startServer() {
   try {
     await initializeDatabase();
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    app.listen(8080, () => {
+      console.log(`Server is running on ${process.env.BASE_URL}`);
     });
   } catch (error) {
     console.error(
