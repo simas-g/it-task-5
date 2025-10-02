@@ -1,4 +1,8 @@
-import { getAllUsers, updateUserStatus } from "../userModel.js";
+import {
+  getAllUsers,
+  updateUserStatus,
+  updateUserLoginTime,
+} from "../userModel.js";
 
 export async function getUsers(_req, res) {
   try {
@@ -11,11 +15,9 @@ export async function getUsers(_req, res) {
       .json({ message: "Failed to retrieve user list due to a server error." });
   }
 }
-
 export async function updateStatus(req, res) {
   const targetUserId = parseInt(req.params.id, 10);
   const { status: newStatus } = req.body;
-  const currentAdminId = req.user.id;
   if (!newStatus || (newStatus !== "active" && newStatus !== "blocked")) {
     return res.status(400).json({
       message: "Invalid status provided. Must be 'active' or 'blocked'.",

@@ -1,15 +1,30 @@
-import React, { useState } from "react";
-
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { login } from "../auth/auth";
+import { useAuth } from "../auth/AuthContext";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const { handleLogin } = useAuth();
 
+  const mutation = useMutation({
+    mutationFn: (variables) => login(variables),
+    onError: (error) => {
+      setErrorMessage(error.message || "Login failed. Please try again.");
+    },
+    onSuccess: (data) => {
+      handleLogin(data);
+      setEmail("");
+      setPassword("");
+      setErrorMessage("");
+    },
+  });
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Attempting Sign In with:", { email, password, rememberMe });
+    mutation.mutate({ email, password });
   };
+  const isLoading = mutation.isPending;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 sm:p-6">
@@ -27,10 +42,7 @@ const LoginPage = () => {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {errorMessage && (
-              <div
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                role="alert"
-              >
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                 <span className="block sm:inline">{errorMessage}</span>
               </div>
             )}
@@ -46,8 +58,6 @@ const LoginPage = () => {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="test@example.com"
@@ -66,41 +76,11 @@ const LoginPage = () => {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
-                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mt-1"
               />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot password?
-                </a>
-              </div>
             </div>
 
             <div>

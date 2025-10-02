@@ -3,10 +3,13 @@ import {
   registerUser,
   loginUser,
   verifyUser,
+  logoutUser,
+  checkUserStatus,
 } from "../controllers/authControllers.js";
-
 const router = express.Router();
 router.post("/login", loginUser);
 router.post("/register", registerUser);
-router.get("/verify", verifyUser);
+router.post("/logout", logoutUser);
+router.get("/verify-email", verifyUser);
+router.get("/status", checkUserStatus);
 export default router;

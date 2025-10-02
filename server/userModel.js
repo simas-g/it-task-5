@@ -80,3 +80,15 @@ export async function updateUserStatus(userId, newStatus) {
     throw new Error("Failed to update user status.");
   }
 }
+
+export async function updateUserLoginTime(userId) {
+  const query = "UPDATE users SET last_login_time = NOW() WHERE id = ?";
+
+  try {
+    const [result] = await pool.query(query, [userId]);
+    return result.affectedRows === 1;
+  } catch (error) {
+    console.error("Database Error (updateUserLoginTime):", error);
+    throw new Error("Failed to update user login time.");
+  }
+}

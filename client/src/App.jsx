@@ -1,23 +1,20 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-
+import { AuthProvider } from "./auth/AuthContext.jsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { routeConfig, RouteRenderer } from "./routes/routeRenderer.jsx";
+import Nav from "./components/Nav.jsx";
+const queryClient = new QueryClient();
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<h1>404 - Not Found</h1>} />
-      </Routes>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <Nav></Nav>
+          <RouteRenderer config={routeConfig} />
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 };
 

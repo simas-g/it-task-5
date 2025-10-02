@@ -1,16 +1,54 @@
-import React, { useState } from "react";
-
+import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { useMutation } from "@tanstack/react-query";
+import { register } from "../auth/auth";
 const RegistrationPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const { name, email, password, confirmPassword } = formData;
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const inputClass =
     "relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mt-1";
   const labelClass = "block text-sm font-medium text-gray-700";
+  const { handleLogin } = useAuth();
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
+
+  const mutation = useMutation({
+    mutationFn: (variables) => register(variables),
+    onError: (error) => {
+      setErrorMessage(
+        error.message || "Registration failed. Please try again."
+      );
+      setSuccessMessage("");
+    },
+    onSuccess: () => {
+      resetForm();
+      setSuccessMessage("Registration successful! You can now log in.");
+    },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,13 +59,15 @@ const RegistrationPage = () => {
       setErrorMessage("Passwords do not match.");
       return;
     }
-
-    if (!password) {
-      setErrorMessage("Password cannot be empty.");
+    if (!name || !email || !password || !confirmPassword) {
+      setErrorMessage("Please fill in all required fields.");
       return;
     }
+
+    mutation.mutate({ name, email, password });
   };
 
+  const isLoading = mutation.isPending;
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 sm:p-6">
       <div className="w-full max-w-md">
@@ -63,11 +103,9 @@ const RegistrationPage = () => {
                 id="name"
                 name="name"
                 type="text"
-                required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => handleChange(e)}
                 placeholder="Alex Clare"
-                autoComplete="name"
                 className={inputClass}
               />
             </div>
@@ -80,9 +118,8 @@ const RegistrationPage = () => {
                 id="email"
                 name="email"
                 type="email"
-                required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleChange(e)}
                 placeholder="you@company.com"
                 className={inputClass}
               />
@@ -96,9 +133,8 @@ const RegistrationPage = () => {
                 id="password"
                 name="password"
                 type="password"
-                required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => handleChange(e)}
                 placeholder="Password"
                 className={inputClass}
               />
@@ -112,9 +148,8 @@ const RegistrationPage = () => {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                required
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => handleChange(e)}
                 placeholder="Confirm Password"
                 className={inputClass}
               />
