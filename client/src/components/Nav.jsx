@@ -1,7 +1,7 @@
 import { useAuth } from "../auth/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 export default function Nav() {
   const { isAuthenticated, user, handleLogout, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function Nav() {
 
   const authLinks = isAuthenticated
     ? [
-        { name: "Dashboard", path: "/dashboard" },
+        { name: user?.email, isButton: true },
         { name: "Logout", onClick: performLogout, isButton: true },
       ]
     : [
@@ -36,8 +36,9 @@ export default function Nav() {
       {link.isButton ? (
         <button
           onClick={link.onClick}
-          className="font-medium cursor-pointer hover:text-indigo-200 transition duration-150"
+          className="font-medium flex gap-2 cursor-pointer hover:text-indigo-200 transition duration-150"
         >
+          {link.name.includes("@") && <User></User>}
           {link.name}
         </button>
       ) : (

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Trash, Lock, Unlock } from "lucide-react";
-
+import { formatRelativeTime } from "../../lib/formatTime";
 const USER_COLUMNS = [
   { header: "ID", accessor: "id" },
   { header: "Name", accessor: "name" },
@@ -15,7 +15,6 @@ const renderStatusBadge = (status) => {
     "px-2 inline-flex text-xs leading-5 font-semibold rounded-full";
   switch (status?.toLowerCase()) {
     case "active":
-    case "admin":
       return (
         <span className={`${baseClasses} bg-green-100 text-green-800`}>
           {status}
@@ -36,9 +35,8 @@ const renderStatusBadge = (status) => {
   }
 };
 
-function UserActionsToolbar({ selectedCount }) {
+function UserActionsToolbar({ selectedUsers, selectedCount }) {
   const isSelectionDisabled = selectedCount === 0;
-
   const buttonClass = (disabled, isIcon = false) => `
         flex items-center justify-center p-2 rounded-md transition duration-150
         ${isIcon ? "w-10 h-10" : "px-4 h-10"}
@@ -48,20 +46,14 @@ function UserActionsToolbar({ selectedCount }) {
             : "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500"
         }
     `;
-
-  const handleGlobalDeleteUnverified = () => {
-    alert("Deleting all unverified users (global action)...");
-  };
-
   const handleBulkAction = (action) => {
     if (isSelectionDisabled) return;
-    alert(
-      `${action} action performed on ${selectedCount} user(s): [${Array.from(
+    console.log(
+      `ACTION: ${action} performed on ${selectedCount} user(s): [${Array.from(
         selectedUsers
       ).join(", ")}]`
     );
   };
-
   return (
     <div className="bg-white p-3 border-b border-gray-200 shadow-sm rounded-t-lg flex justify-between items-center flex-wrap gap-2">
       <h3 className="text-sm font-semibold text-gray-700 mr-4">
@@ -86,18 +78,10 @@ function UserActionsToolbar({ selectedCount }) {
         <button
           onClick={() => handleBulkAction("Delete")}
           disabled={isSelectionDisabled}
-          className={buttonClass(isSelectionDisabled, true)
-            .replace("bg-indigo", "bg-red")
-            .replace("hover:bg-indigo", "hover:bg-red")}
-        >
-          <Trash size={20} />
-        </button>
-        <button
-          onClick={handleGlobalDeleteUnverified}
-          className={buttonClass(false, true)
-            .replace("bg-indigo", "bg-yellow-500")
-            .replace("hover:bg-indigo", "hover:bg-yellow-600")}
-          title="Delete all unverified users"
+          className={buttonClass(isSelectionDisabled, true).replace(
+            /indigo/g,
+            "red"
+          )}
         >
           <Trash size={20} />
         </button>
@@ -106,79 +90,11 @@ function UserActionsToolbar({ selectedCount }) {
   );
 }
 
-export function formatRelativeTime(dateInput) {
-  if (!dateInput) {
-    return "N/A";
-  }
-
-  const date = new Date(dateInput);
-  if (isNaN(date.getTime())) {
-    return "Invalid Date";
-  }
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-  if (seconds < 0) {
-    return "Just now";
-  }
-
-  const MINUTE = 60;
-  const HOUR = 3600;
-  const DAY = 86400;
-  const MONTH = 2592000;
-  const YEAR = 31536000;
-  if (seconds < 10) {
-    return "Just now";
-  }
-  if (seconds < MINUTE) {
-    return `${seconds} seconds ago`;
-  }
-
-  const minutes = Math.floor(seconds / MINUTE);
-  if (minutes < 60) {
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  }
-
-  const hours = Math.floor(seconds / HOUR);
-  if (hours < 24) {
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  }
-
-  const days = Math.floor(seconds / DAY);
-  if (days < 30) {
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  }
-
-  const months = Math.floor(seconds / MONTH);
-  if (months < 12) {
-    return `${months} month${months > 1 ? "s" : ""} ago`;
-  }
-
-  const years = Math.floor(seconds / YEAR);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
-}
-export default function UserTable({ users, isLoading, error }) {
+export default function UserTable({ users }) {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-10 bg-white rounded-lg shadow-md">
-        <p className="text-lg text-indigo-600">Loading user data...</p>
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-        <p>Error: Failed to load users. {error.message}</p>
-      </div>
-    );
-  }
   if (!users || users.length === 0) {
-    return (
-      <p className="text-gray-500 p-4 bg-white rounded-lg shadow-md">
-        No registered users found.
-      </p>
-    );
+    return;
   }
 
   const handleSelectUser = (userId) => {
