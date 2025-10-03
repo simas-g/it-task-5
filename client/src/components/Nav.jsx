@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Menu, X, User } from "lucide-react";
 
 export default function Nav() {
-  const { isAuthenticated, user, handleLogout, isLoading } = useAuth();
+  const { isAuthenticated, user, handleLogout, loading } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const performLogout = (e) => {
     e.preventDefault();
     handleLogout();
     setIsMenuOpen(false);
   };
-  if (isLoading) {
+  if (loading) {
     return (
       <nav className="w-full bg-indigo-600 shadow-sm p-4 text-white">
         <p>Loading...</p>

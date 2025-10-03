@@ -12,9 +12,7 @@ const AuthProvider = ({ children }) => {
     async function initializeSession() {
       setLoading(true);
       const sessionResult = await checkSession();
-      console.log(sessionResult, "seehs");
       if (!sessionResult || !sessionResult.status) {
-        console.log("No valid session found or session expired.");
         setUser(null);
         setLoading(false);
         return;

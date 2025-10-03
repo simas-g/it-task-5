@@ -61,7 +61,7 @@ const RegistrationPage = () => {
     mutation.mutate({ name, email, password });
   };
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 sm:p-6">
+    <div className="flex min-h-screen items-center justify-center bg-indigo-50 p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="bg-white p-8 rounded-lg shadow-xl border border-gray-200">
           <h1 className="text-3xl font-extrabold text-center text-gray-900">
