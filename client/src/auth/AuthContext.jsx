@@ -10,6 +10,7 @@ const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   useEffect(() => {
     async function initializeSession() {
+      setLoading(true);
       const sessionResult = await checkSession();
       console.log(sessionResult, "seehs");
       if (!sessionResult || !sessionResult.status) {
@@ -23,7 +24,6 @@ const AuthProvider = ({ children }) => {
         setLoading(false);
         return;
       }
-      console.log("Session active. Status:", sessionResult.status);
       setUser(sessionResult);
       setLoading(false);
     }
