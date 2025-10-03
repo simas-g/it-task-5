@@ -7,7 +7,7 @@ import {
   findUserByEmail,
   createUser,
   findUserByVerificationToken,
-  updateUserStatus,
+  updateUsersStatus,
   updateUserLoginTime,
 } from "../userModel.js";
 import { sendVerificationEmail } from "../mailerService.js";
@@ -33,7 +33,7 @@ export async function verifyUser(req, res) {
         "Account is already verified."
       );
     }
-    const success = await updateUserStatus(user.id, "active");
+    const success = await updateUsersStatus([user.id], "active");
     if (success) {
       return serverMessages(
         res,

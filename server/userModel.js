@@ -69,18 +69,6 @@ export async function getAllUsers() {
   }
 }
 
-export async function updateUserStatus(userId, newStatus) {
-  const query = "UPDATE users SET status = ? WHERE id = ?";
-
-  try {
-    const [result] = await pool.query(query, [newStatus, userId]);
-    return result.affectedRows === 1;
-  } catch (error) {
-    console.error("Database Error (updateUserStatus):", error);
-    throw new Error("Failed to update user status.");
-  }
-}
-
 export async function updateUserLoginTime(userId) {
   const query = "UPDATE users SET last_login_time = NOW() WHERE id = ?";
 
@@ -90,5 +78,39 @@ export async function updateUserLoginTime(userId) {
   } catch (error) {
     console.error("Database Error (updateUserLoginTime):", error);
     throw new Error("Failed to update user login time.");
+  }
+}
+
+export async function updateUsersStatus(userIds, newStatus) {
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return { affectedRows: 0, totalRequested: 0 };
+  }
+  const query = "UPDATE users SET status = ? WHERE id IN (?)";
+  try {
+    const [result] = await pool.query(query, [newStatus, userIds]);
+    return {
+      affectedRows: result.affectedRows,
+      totalRequested: userIds.length,
+    };
+  } catch (error) {
+    console.error("Database Error (updateUsersStatus):", error);
+    throw new Error("Failed to update user status.");
+  }
+}
+
+export async function deleteUsersByIds(userIds) {
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return { affectedRows: 0, totalRequested: 0 };
+  }
+  const query = "DELETE from users WHERE id IN (?)";
+  try {
+    const [result] = await pool.query(query, [userIds]);
+    return {
+      affectedRows: result.affectedRows,
+      totalRequested: userIds.length,
+    };
+  } catch (error) {
+    console.error("Database Error (deleteUsers):", error);
+    throw new Error("Failed to delete Users.");
   }
 }

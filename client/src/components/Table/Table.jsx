@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Trash, Lock, Unlock } from "lucide-react";
+import { Trash, Lock, Unlock, LucideThermometerSnowflake } from "lucide-react";
 import { formatRelativeTime } from "../../lib/formatTime";
+import { deleteUsers } from "../../lib/deleteUser";
+import { updateStatus } from "../../lib/updateUserStatus";
 const USER_COLUMNS = [
   { header: "ID", accessor: "id" },
   { header: "Name", accessor: "name" },
@@ -43,16 +45,27 @@ function UserActionsToolbar({ selectedUsers, selectedCount }) {
         ${
           disabled
             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-            : "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500"
+            : "bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
         }
     `;
-  const handleBulkAction = (action) => {
+
+  const handleBulkAction = async (action) => {
     if (isSelectionDisabled) return;
-    console.log(
-      `ACTION: ${action} performed on ${selectedCount} user(s): [${Array.from(
-        selectedUsers
-      ).join(", ")}]`
-    );
+    const users = Array.from(selectedUsers);
+    try {
+      if (action === "Block") {
+        await updateStatus(users, "Blocked");
+        console.log(`Successfully Blocked ${selectedCount} users.`);
+      } else if (action === "Unblock") {
+        await updateStatus(users, "Active");
+        console.log(`Successfully Unblocked ${selectedCount} users.`);
+      } else if (action === "Delete") {
+        await deleteUsers(users);
+        console.log(`Successfully Deleted ${selectedCount} users.`);
+      }
+    } catch (error) {
+      console.error(`Error performing ${action} action:`, error.message);
+    }
   };
   return (
     <div className="bg-white p-3 border-b border-gray-200 shadow-sm rounded-t-lg flex justify-between items-center flex-wrap gap-2">
@@ -78,10 +91,9 @@ function UserActionsToolbar({ selectedUsers, selectedCount }) {
         <button
           onClick={() => handleBulkAction("Delete")}
           disabled={isSelectionDisabled}
-          className={buttonClass(isSelectionDisabled, true).replace(
-            /indigo/g,
-            "red"
-          )}
+          className={buttonClass(isSelectionDisabled, true)
+            ?.replace(/bg-indigo-600/g, "bg-red-400")
+            .replace(/hover:bg-indigo-700/g, "hover:bg-red-500")}
         >
           <Trash size={20} />
         </button>
@@ -133,7 +145,7 @@ export default function UserTable({ users }) {
                   checked={isAllSelected}
                   ref={(el) => el && (el.indeterminate = isIndeterminate)}
                   onChange={handleSelectAll}
-                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
                 />
               </th>
               {USER_COLUMNS.map((column) => (
@@ -159,7 +171,7 @@ export default function UserTable({ users }) {
                     type="checkbox"
                     checked={selectedUsers.has(user.id)}
                     onChange={() => handleSelectUser(user.id)}
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded "
                   />
                 </td>
                 {USER_COLUMNS.map((column) => {
@@ -225,7 +237,7 @@ export default function UserTable({ users }) {
                 type="checkbox"
                 checked={selectedUsers.has(user.id)}
                 onChange={() => handleSelectUser(user.id)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded "
               />
               <h3 className="text-lg font-semibold text-gray-900">
                 {user.name}
@@ -240,10 +252,12 @@ export default function UserTable({ users }) {
             <dd className="text-gray-900">{renderStatusBadge(user.status)}</dd>
 
             <dt className="text-gray-500">Registered:</dt>
-            <dd className="text-gray-900">{user.created_at}</dd>
+            <dd className="text-gray-900">{user.created_at.split("T")[0]}</dd>
 
             <dt className="text-gray-500">Last Active:</dt>
-            <dd className="text-gray-900">{user.last_login_time}</dd>
+            <dd className="text-gray-900">
+              {formatRelativeTime(user.last_login_time)}
+            </dd>
           </dl>
         </div>
       ))}
@@ -252,7 +266,10 @@ export default function UserTable({ users }) {
 
   return (
     <div className="space-y-4">
-      <UserActionsToolbar selectedCount={selectedUsers.size} />
+      <UserActionsToolbar
+        selectedCount={selectedUsers.size}
+        selectedUsers={selectedUsers}
+      />
       {desktopTable}
       {mobileCards}
     </div>

@@ -1,10 +1,9 @@
 import { useAuth } from "../auth/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Menu, X, User } from "lucide-react";
 export default function Nav() {
   const { isAuthenticated, user, handleLogout, isLoading } = useAuth();
-  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const performLogout = (e) => {
@@ -38,7 +37,7 @@ export default function Nav() {
           onClick={link.onClick}
           className="font-medium flex gap-2 cursor-pointer hover:text-indigo-200 transition duration-150"
         >
-          {link.name.includes("@") && <User></User>}
+          {link.name?.includes("@") && <User></User>}
           {link.name}
         </button>
       ) : (
