@@ -14,7 +14,7 @@ const signTokenAndSendCookie = (user, res) => {
   const cookieOptions = {
     expires: new Date(Date.now() + JWT_COOKIE_EXPIRES),
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "Lax",
   };
   return res.cookie("jwt", token, cookieOptions);
