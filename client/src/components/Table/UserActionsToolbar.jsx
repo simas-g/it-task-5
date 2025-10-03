@@ -1,13 +1,14 @@
 import { deleteUsers } from "../../lib/deleteUser";
 import { updateStatus } from "../../lib/updateUserStatus";
 import { Trash, Lock, Unlock } from "lucide-react";
-
+import { useAuth } from "../../auth/AuthContext";
 export default function UserActionsToolbar({
   selectedUsers,
   selectedCount,
   notifyUser,
   onSuccess,
 }) {
+  const { handleLogout } = useAuth();
   const isSelectionDisabled = selectedCount === 0;
   const buttonClass = (disabled, isIcon = false) => `
         flex items-center justify-center p-2 rounded-md transition duration-150
@@ -38,7 +39,6 @@ export default function UserActionsToolbar({
       }
       const affectedCount = res.affectedRows;
       const requestedCount = res.totalRequested || users.length;
-
       if (affectedCount > 0) {
         const actionVerb =
           action === "Delete" ? "deleted" : action.toLowerCase() + "ed";
@@ -64,6 +64,13 @@ export default function UserActionsToolbar({
         message = res.message;
         type = "error";
       }
+      if (
+        action == "Block" &&
+        selectedCount == users.length &&
+        affectedCount > 0
+      ) {
+        handleLogout();
+      }
       notifyUser(message, type);
     } catch (error) {
       const errorMessage = error.message || `Operation failed for ${action}.`;
@@ -73,7 +80,6 @@ export default function UserActionsToolbar({
       onSuccess();
     }
   };
-
   return (
     <div className="bg-white p-3 border-b border-gray-200 shadow-sm rounded-t-lg flex justify-between items-center flex-wrap gap-2">
       <h3 className="text-sm font-semibold text-gray-700 mr-4">
