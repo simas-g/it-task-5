@@ -15,7 +15,7 @@ const signTokenAndSendCookie = (user, res) => {
     expires: new Date(Date.now() + JWT_COOKIE_EXPIRES),
     httpOnly: true,
     secure: true,
-    sameSite: "Lax",
+    sameSite: "None",
   };
   return res.cookie("jwt", token, cookieOptions);
 };
