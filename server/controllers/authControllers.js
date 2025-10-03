@@ -180,13 +180,13 @@ export async function checkUserStatus(req, res) {
 }
 
 export async function logoutUser(_req, res) {
-  res.cookie("jwt", "loggedout", {
+  res.clearCookie("jwt", {
     httpOnly: true,
-    expires: new Date(Date.now() + 10),
     secure: true,
-    sameSite: "Lax",
+    sameSite: "None",
   });
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   return res
     .status(200)
-    .json({ message: "Successfully logged out and cookie cleared." });
+    .json({ message: "Successfully logged out and cookie deleted." });
 }
