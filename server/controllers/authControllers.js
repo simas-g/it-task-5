@@ -145,10 +145,15 @@ export async function checkUserStatus(req, res) {
       status: user.status,
     });
   } catch (err) {
-    res.cookie("jwt", "expired", {
-      httpOnly: true,
-      expires: new Date(Date.now() - 1),
-    });
+    res
+      .setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate"
+      )
+      .cookie("jwt", "expired", {
+        httpOnly: true,
+        expires: new Date(Date.now() - 1),
+      });
     return res
       .status(401)
       .json({ message: "Not authenticated. Session invalid." });
