@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import serverMessages from "../serverMessages.js";
 import signCookie from "./signJwt.js";
+import { clearSessionAndBlockCache } from "./clearSession.js";
 import {
   findUserByEmail,
   createUser,
@@ -129,34 +130,52 @@ export async function loginUser(req, res) {
       .json({ message: "Internal server error during login." });
   }
 }
+
 export async function checkUserStatus(req, res) {
   const token = req.cookies.jwt;
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Not authenticated. Token missing." });
+    return clearSessionAndBlockCache(
+      res,
+      401,
+      "Not authenticated. Token missing."
+    );
   }
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await findUserByEmail(decoded.email);
+    if (!user) {
+      return clearSessionAndBlockCache(
+        res,
+        401,
+        "Invalid session. User not found."
+      );
+    }
+    if (user.status === "blocked") {
+      return clearSessionAndBlockCache(
+        res,
+        403,
+        "Access denied. Account is blocked."
+      );
+    }
     return res.status(200).json({
       userId: user.id,
       email: user.email,
       status: user.status,
     });
   } catch (err) {
-    res
-      .setHeader(
-        "Cache-Control",
-        "no-store, no-cache, must-revalidate, proxy-revalidate"
-      )
-      .cookie("jwt", "expired", {
-        httpOnly: true,
-        expires: new Date(Date.now() - 1),
-      });
-    return res
-      .status(401)
-      .json({ message: "Not authenticated. Session invalid." });
+    console.error("JWT validation error:", err.message);
+    return clearSessionAndBlockCache(
+      res,
+      401,
+      "Not authenticated. Session invalid or expired."
+    );
   }
 }
 
