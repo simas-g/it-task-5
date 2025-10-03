@@ -1,16 +1,7 @@
-import React, { useState } from "react";
-import { Trash, Lock, Unlock, LucideThermometerSnowflake } from "lucide-react";
+import { useState } from "react";
 import { formatRelativeTime } from "../../lib/formatTime";
-import { deleteUsers } from "../../lib/deleteUser";
-import { updateStatus } from "../../lib/updateUserStatus";
-const USER_COLUMNS = [
-  { header: "ID", accessor: "id" },
-  { header: "Name", accessor: "name" },
-  { header: "Email", accessor: "email" },
-  { header: "Status", accessor: "status" },
-  { header: "Registered", accessor: "created_at", isDate: true },
-  { header: "Last Active", accessor: "last_login_time", isDate: true },
-];
+import UserActionsToolbar from "./UserActionsToolbar";
+import USER_COLUMNS from "./user_columns.js";
 
 const renderStatusBadge = (status) => {
   const baseClasses =
@@ -18,13 +9,13 @@ const renderStatusBadge = (status) => {
   switch (status?.toLowerCase()) {
     case "active":
       return (
-        <span className={`${baseClasses} bg-green-100 text-green-800`}>
+        <span className={`${baseClasses} bg-green-100 text-green-500`}>
           {status}
         </span>
       );
     case "blocked":
       return (
-        <span className={`${baseClasses} bg-red-100 text-red-800`}>
+        <span className={`${baseClasses} bg-red-100 text-red-600`}>
           {status}
         </span>
       );
@@ -37,78 +28,19 @@ const renderStatusBadge = (status) => {
   }
 };
 
-function UserActionsToolbar({ selectedUsers, selectedCount }) {
-  const isSelectionDisabled = selectedCount === 0;
-  const buttonClass = (disabled, isIcon = false) => `
-        flex items-center justify-center p-2 rounded-md transition duration-150
-        ${isIcon ? "w-10 h-10" : "px-4 h-10"}
-        ${
-          disabled
-            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-            : "bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
-        }
-    `;
-
-  const handleBulkAction = async (action) => {
-    if (isSelectionDisabled) return;
-    const users = Array.from(selectedUsers);
-    try {
-      if (action === "Block") {
-        await updateStatus(users, "Blocked");
-        console.log(`Successfully Blocked ${selectedCount} users.`);
-      } else if (action === "Unblock") {
-        await updateStatus(users, "Active");
-        console.log(`Successfully Unblocked ${selectedCount} users.`);
-      } else if (action === "Delete") {
-        await deleteUsers(users);
-        console.log(`Successfully Deleted ${selectedCount} users.`);
-      }
-    } catch (error) {
-      console.error(`Error performing ${action} action:`, error.message);
-    }
-  };
-  return (
-    <div className="bg-white p-3 border-b border-gray-200 shadow-sm rounded-t-lg flex justify-between items-center flex-wrap gap-2">
-      <h3 className="text-sm font-semibold text-gray-700 mr-4">
-        {selectedCount} User(s) Selected
-      </h3>
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={() => handleBulkAction("Block")}
-          disabled={isSelectionDisabled}
-          className={buttonClass(isSelectionDisabled)}
-        >
-          <Lock size={16} className="mr-1" />
-          Block
-        </button>
-        <button
-          onClick={() => handleBulkAction("Unblock")}
-          disabled={isSelectionDisabled}
-          className={buttonClass(isSelectionDisabled, true)}
-        >
-          <Unlock size={20} />
-        </button>
-        <button
-          onClick={() => handleBulkAction("Delete")}
-          disabled={isSelectionDisabled}
-          className={buttonClass(isSelectionDisabled, true)
-            ?.replace(/bg-indigo-600/g, "bg-red-400")
-            .replace(/hover:bg-indigo-700/g, "hover:bg-red-500")}
-        >
-          <Trash size={20} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default function UserTable({ users }) {
+export default function UserTable({
+  users,
+  refetch: onUsersMutated,
+  notifyUser,
+}) {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
-
   if (!users || users.length === 0) {
-    return;
+    return null;
   }
-
+  const handleActionSuccess = () => {
+    setSelectedUsers(new Set());
+    onUsersMutated();
+  };
   const handleSelectUser = (userId) => {
     setSelectedUsers((prevSelected) => {
       const newSet = new Set(prevSelected);
@@ -120,7 +52,6 @@ export default function UserTable({ users }) {
       return newSet;
     });
   };
-
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const allUserIds = new Set(users.map((u) => u.id));
@@ -129,10 +60,8 @@ export default function UserTable({ users }) {
       setSelectedUsers(new Set());
     }
   };
-
   const isAllSelected = selectedUsers.size === users.length && users.length > 0;
   const isIndeterminate = selectedUsers.size > 0 && !isAllSelected;
-
   const desktopTable = (
     <div className="hidden lg:block shadow-xl rounded-lg border border-gray-200">
       <div className="overflow-x-auto rounded-lg">
@@ -204,7 +133,6 @@ export default function UserTable({ users }) {
       </div>
     </div>
   );
-
   const mobileCards = (
     <div className="lg:hidden space-y-4">
       <div className="bg-white p-4 border border-gray-300 shadow-sm rounded-lg flex items-center justify-between">
@@ -263,12 +191,13 @@ export default function UserTable({ users }) {
       ))}
     </div>
   );
-
   return (
     <div className="space-y-4">
       <UserActionsToolbar
         selectedCount={selectedUsers.size}
         selectedUsers={selectedUsers}
+        notifyUser={notifyUser}
+        onSuccess={handleActionSuccess}
       />
       {desktopTable}
       {mobileCards}

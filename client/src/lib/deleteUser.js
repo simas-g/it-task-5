@@ -8,7 +8,5 @@ export async function deleteUsers(ids) {
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data);
-  } else return data;
+  return data;
 }

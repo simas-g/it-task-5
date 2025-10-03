@@ -71,7 +71,6 @@ export async function getAllUsers() {
 
 export async function updateUserLoginTime(userId) {
   const query = "UPDATE users SET last_login_time = NOW() WHERE id = ?";
-
   try {
     const [result] = await pool.query(query, [userId]);
     return result.affectedRows === 1;
@@ -85,9 +84,9 @@ export async function updateUsersStatus(userIds, newStatus) {
   if (!Array.isArray(userIds) || userIds.length === 0) {
     return { affectedRows: 0, totalRequested: 0 };
   }
-  const query = "UPDATE users SET status = ? WHERE id IN (?)";
+  const query = "UPDATE users SET status = ? WHERE id IN (?) AND status != ?";
   try {
-    const [result] = await pool.query(query, [newStatus, userIds]);
+    const [result] = await pool.query(query, [newStatus, userIds, newStatus]);
     return {
       affectedRows: result.affectedRows,
       totalRequested: userIds.length,

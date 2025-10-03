@@ -15,9 +15,9 @@ export async function getUsers(_req, res) {
       .json({ message: "Failed to retrieve user list due to a server error." });
   }
 }
+
 export async function updateStatus(req, res) {
   const { status, ids } = req.body;
-  console.log(status, ids, "controlelr");
   const newStatus = status.toLowerCase();
   if (!newStatus || (newStatus !== "active" && newStatus !== "blocked")) {
     return res.status(400).json({
@@ -27,9 +27,7 @@ export async function updateStatus(req, res) {
   try {
     const success = await updateUsersStatus(ids, newStatus);
     if (success) {
-      return res.status(200).json({
-        message: `Users [${ids}] status updated to '${newStatus}' successfully.`,
-      });
+      return res.status(200).json(success);
     } else {
       return res.status(404).json({
         message: `Users with ID [${ids}] not found.`,

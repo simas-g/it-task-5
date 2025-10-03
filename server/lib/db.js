@@ -1,6 +1,7 @@
 import mysql from "mysql2";
 
 let pool;
+
 async function initializeDatabase() {
   try {
     pool = mysql.createPool(process.env.DATABASE_URL).promise();

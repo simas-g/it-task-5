@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { login } from "../auth/auth";
 import { useAuth } from "../auth/AuthContext";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { handleLogin } = useAuth();
-
   const mutation = useMutation({
     mutationFn: (variables) => login(variables),
     onError: (error) => {
@@ -24,8 +24,6 @@ const LoginPage = () => {
     e.preventDefault();
     mutation.mutate({ email, password });
   };
-  const isLoading = mutation.isPending;
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 sm:p-6">
       <div className="w-full max-w-md">

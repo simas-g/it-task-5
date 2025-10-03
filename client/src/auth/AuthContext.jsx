@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { checkSession, login, logout } from "./auth";
 import { useNavigate } from "react-router-dom";
+
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
@@ -15,19 +16,16 @@ const AuthProvider = ({ children }) => {
     }
     getUser();
   }, []);
-
   const handleLogin = async (userData) => {
     login({ email: userData.email, password: userData.password });
     setUser(userData);
     navigate("/dashboard");
   };
-
   const handleLogout = async () => {
     logout();
     navigate("/login");
     setUser(null);
   };
-
   const isAuthenticated = !!user;
   const contextValue = {
     user,
@@ -36,7 +34,6 @@ const AuthProvider = ({ children }) => {
     handleLogout,
     loading,
   };
-
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );

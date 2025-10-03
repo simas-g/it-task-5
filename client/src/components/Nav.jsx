@@ -2,16 +2,15 @@ import { useAuth } from "../auth/AuthContext";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X, User } from "lucide-react";
+
 export default function Nav() {
   const { isAuthenticated, user, handleLogout, isLoading } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const performLogout = (e) => {
     e.preventDefault();
     handleLogout();
     setIsMenuOpen(false);
   };
-
   if (isLoading) {
     return (
       <nav className="w-full bg-indigo-600 shadow-sm p-4 text-white">
@@ -19,7 +18,6 @@ export default function Nav() {
       </nav>
     );
   }
-
   const authLinks = isAuthenticated
     ? [
         { name: user?.email, isButton: true },
@@ -29,7 +27,6 @@ export default function Nav() {
         { name: "Login", path: "/login" },
         { name: "Register", path: "/register" },
       ];
-
   const renderLink = (link, extraClass = "") => (
     <li key={link.name} className={extraClass}>
       {link.isButton ? (
@@ -51,7 +48,6 @@ export default function Nav() {
       )}
     </li>
   );
-
   return (
     <nav className="w-full bg-indigo-600 shadow-lg text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -11,6 +11,7 @@ import {
   updateUserLoginTime,
 } from "../userModel.js";
 import { sendVerificationEmail } from "../mailerService.js";
+
 const SALT_ROUNDS = 10;
 
 export async function verifyUser(req, res) {
@@ -51,6 +52,7 @@ export async function verifyUser(req, res) {
       .json({ message: "Internal server error during verification." });
   }
 }
+
 export async function registerUser(req, res) {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
@@ -146,12 +148,12 @@ export async function checkUserStatus(req, res) {
       httpOnly: true,
       expires: new Date(Date.now() - 1),
     });
-
     return res
       .status(401)
       .json({ message: "Not authenticated. Session invalid." });
   }
 }
+
 export async function logoutUser(_req, res) {
   res.cookie("jwt", "loggedout", {
     httpOnly: true,
@@ -159,7 +161,6 @@ export async function logoutUser(_req, res) {
     secure: true,
     sameSite: "Lax",
   });
-
   return res
     .status(200)
     .json({ message: "Successfully logged out and cookie cleared." });

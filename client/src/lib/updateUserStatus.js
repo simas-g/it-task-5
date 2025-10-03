@@ -8,23 +8,15 @@ export async function updateStatus(ids, newStatus) {
     },
     credentials: "include",
   });
-  if (!res.ok) {
-    let errorData = { message: `Update failed with status: ${res.status}` };
-    try {
-      const errorBody = await res.clone().json();
-      if (errorBody && errorBody.message) {
-        errorData = errorBody;
-      }
-    } catch (e) {}
-    throw new Error(errorData.message);
-  }
   if (res.status === 204) {
-    return { message: "Status updated successfully" };
+    return {
+      success: true,
+      message: "Status updated successfully (No content returned by server).",
+    };
   }
-  try {
-    const data = await res.json();
-    return data;
-  } catch (e) {
-    return { message: "Status updated successfully, but response was empty." };
+  if (res.status === 400) {
+    return "Your account must be active to perform action.";
   }
+  const data = await res.json();
+  return data;
 }
