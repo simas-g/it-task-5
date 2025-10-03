@@ -9,12 +9,25 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    async function getUser() {
-      const user = await checkSession();
-      setUser(user);
+    async function initializeSession() {
+      const sessionResult = await checkSession();
+      console.log(sessionResult, "seehs");
+      if (!sessionResult || !sessionResult.status) {
+        console.log("No valid session found or session expired.");
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      if (sessionResult.status === "blocked") {
+        await handleLogout();
+        setLoading(false);
+        return;
+      }
+      console.log("Session active. Status:", sessionResult.status);
+      setUser(sessionResult);
       setLoading(false);
     }
-    getUser();
+    initializeSession();
   }, []);
   const handleLogin = async (userData) => {
     login({ email: userData.email, password: userData.password });

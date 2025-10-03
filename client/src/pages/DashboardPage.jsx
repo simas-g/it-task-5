@@ -6,7 +6,7 @@ import ToastContainer from "../components/Table/ToastContainer";
 
 export default function DashboardPage() {
   const { data, isPending, refetch } = useQuery({
-    queryKey: ["users"],
+    queryKey: [""],
     queryFn: () => fetchUsers(),
   });
   const [toast, setToast] = useState({ message: "", type: "" });

@@ -138,13 +138,14 @@ export async function checkUserStatus(req, res) {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await findUserByEmail(decoded.email);
     return res.status(200).json({
-      userId: decoded.id,
-      status: decoded.status,
-      email: decoded.email,
+      userId: user.id,
+      email: user.email,
+      status: user.status,
     });
   } catch (err) {
-    res.cookie(JWT_COOKIE_NAME, "expired", {
+    res.cookie("jwt", "expired", {
       httpOnly: true,
       expires: new Date(Date.now() - 1),
     });

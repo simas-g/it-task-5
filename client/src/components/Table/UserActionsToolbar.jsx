@@ -20,7 +20,6 @@ export default function UserActionsToolbar({
     `;
   const handleBulkAction = async (action) => {
     let type = "success";
-
     if (isSelectionDisabled) return;
     const users = Array.from(selectedUsers);
     try {
@@ -66,11 +65,12 @@ export default function UserActionsToolbar({
         type = "error";
       }
       notifyUser(message, type);
-
-      onSuccess();
     } catch (error) {
       const errorMessage = error.message || `Operation failed for ${action}.`;
+      console.log("nigeris");
       notifyUser(errorMessage, "error");
+    } finally {
+      onSuccess();
     }
   };
 

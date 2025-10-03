@@ -8,15 +8,6 @@ export async function updateStatus(ids, newStatus) {
     },
     credentials: "include",
   });
-  if (res.status === 204) {
-    return {
-      success: true,
-      message: "Status updated successfully (No content returned by server).",
-    };
-  }
-  if (res.status === 400) {
-    return "Your account must be active to perform action.";
-  }
   const data = await res.json();
   return data;
 }

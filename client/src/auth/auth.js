@@ -48,10 +48,6 @@ export async function checkSession() {
       credentials: "include",
     }
   );
-
-  if (!response.ok) {
-    return null;
-  }
   return response.json();
 }
 

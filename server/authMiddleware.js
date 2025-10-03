@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { findUserByEmail } from "./userModel.js";
 
-export function verifyToken(req, res, next) {
+export async function verifyToken(req, res, next) {
   const token = req.cookies.jwt;
   if (!token) {
     return res
@@ -9,7 +10,11 @@ export function verifyToken(req, res, next) {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await findUserByEmail(decoded.email);
+    if (!user) {
+      throw new Error();
+    }
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired token." });
@@ -17,7 +22,7 @@ export function verifyToken(req, res, next) {
 }
 
 export function checkAdmin(req, res, next) {
-  if (!req.user || !req.user.status) {
+  if (!req.user) {
     return res.status(403).json({ message: "Forbidden. User status unknown." });
   }
   if (req.user.status === "active") {

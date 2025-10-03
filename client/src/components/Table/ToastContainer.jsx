@@ -5,6 +5,9 @@ const TOAST_ROOT_ELEMENT = document.getElementById("toast-root");
 
 export default function ToastContainer({ message, type, onClose }) {
   if (!message || !TOAST_ROOT_ELEMENT) return null;
+  if (type === "error") {
+    setTimeout(() => window.location.reload(), 500);
+  }
   const baseClasses =
     "fixed bottom-5 right-5 p-4 rounded-lg shadow-lg flex items-center text-white font-semibold z-50 transition-transform duration-300";
   let colorClasses;
