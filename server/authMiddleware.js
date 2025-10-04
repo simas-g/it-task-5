@@ -25,7 +25,7 @@ export function checkAdmin(req, res, next) {
   if (!req.user) {
     return res.status(403).json({ message: "Forbidden. User status unknown." });
   }
-  if (req.user.status === "active") {
+  if (req.user.status !== "blocked") {
     next();
   } else {
     return res
