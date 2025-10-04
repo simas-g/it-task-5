@@ -66,9 +66,8 @@ export default function UserActionsToolbar({
       }
       if (
         action == "Block" &&
-        selectedCount == users.length &&
-        affectedCount > 0 &&
-        selectedUsers.has(user.id)
+        requestedCount === users.length &&
+        selectedUsers.has(user.userId)
       ) {
         handleLogout();
       }
