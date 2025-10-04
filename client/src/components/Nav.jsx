@@ -13,9 +13,7 @@ export default function Nav() {
   };
   if (loading) {
     return (
-      <nav className="w-full bg-indigo-600 shadow-sm p-4 text-white">
-        <p>Loading...</p>
-      </nav>
+      <nav className="w-full bg-indigo-600 shadow-sm p-4 text-white"></nav>
     );
   }
   const authLinks = isAuthenticated

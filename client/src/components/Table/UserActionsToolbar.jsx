@@ -8,7 +8,7 @@ export default function UserActionsToolbar({
   notifyUser,
   onSuccess,
 }) {
-  const { handleLogout } = useAuth();
+  const { handleLogout, user } = useAuth();
   const isSelectionDisabled = selectedCount === 0;
   const buttonClass = (disabled, isIcon = false) => `
         flex items-center justify-center p-2 rounded-md transition duration-150
@@ -67,14 +67,14 @@ export default function UserActionsToolbar({
       if (
         action == "Block" &&
         selectedCount == users.length &&
-        affectedCount > 0
+        affectedCount > 0 &&
+        selectedUsers.has(user.id)
       ) {
         handleLogout();
       }
       notifyUser(message, type);
     } catch (error) {
       const errorMessage = error.message || `Operation failed for ${action}.`;
-      console.log("nigeris");
       notifyUser(errorMessage, "error");
     } finally {
       onSuccess();
