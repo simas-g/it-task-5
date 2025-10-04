@@ -38,7 +38,7 @@ export default function UserActionsToolbar({
         res = await deleteUsers(users);
       }
       const affectedCount = res.affectedRows;
-      const requestedCount = res.totalRequested || users.length;
+      const requestedCount = res.totalRequested;
       if (affectedCount > 0) {
         const actionVerb =
           action === "Delete" ? "deleted" : action.toLowerCase() + "ed";
@@ -67,7 +67,8 @@ export default function UserActionsToolbar({
       if (
         action == "Block" &&
         requestedCount === users.length &&
-        selectedUsers.has(user.userId)
+        selectedUsers.has(user.userId) &&
+        user.status !== "unverified"
       ) {
         handleLogout();
       }
